@@ -3,12 +3,23 @@ import "./style.css";
 import leaflet from "leaflet";
 import luck from "./luck";
 import "./leafletWorkaround";
+//import board from "./board";
 
+/*interface Coin {
+    i: number;
+    j: number;
+    serial: number;
+}*/
 
 const MERRILL_CLASSROOM = leaflet.latLng({
     lat: 36.9995,
     lng: - 122.0533
 });
+
+/*const NULL_ISLAND = leaflet.latLng({
+    lat: 0,
+    lng: 0
+});*/
 
 const GAMEPLAY_ZOOM_LEVEL = 19;
 const TILE_DEGREES = 1e-4;
