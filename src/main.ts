@@ -6,8 +6,8 @@ import "./leafletWorkaround";
 //import board from "./board";
 
 interface Coin {
-    i: number;
-    j: number;
+    i: string;
+    j: string;
     serial: number;
 }
 
@@ -23,6 +23,7 @@ const MERRILL_CLASSROOM = leaflet.latLng({
 
 const GAMEPLAY_ZOOM_LEVEL = 19;
 const TILE_DEGREES = 1e-4;
+const DEGREE_TO_ROUND = 4;
 const NEIGHBORHOOD_SIZE = 8;
 const PIT_SPAWN_PROBABILITY = 0.1;
 
@@ -76,14 +77,17 @@ function makePit(i: number, j: number) {
         let value = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
         const coins: Coin[] = new Array<Coin>(value);
 
+        const unanchoredI = (MERRILL_CLASSROOM.lat + i * TILE_DEGREES).toFixed(DEGREE_TO_ROUND);
+        const unanchoredJ = (MERRILL_CLASSROOM.lng + j * TILE_DEGREES).toFixed(DEGREE_TO_ROUND);
+
         // fills array with unique coins
         for (let n = 0; n < coins.length; n++) {
-            coins[n] = {i: i, j: j, serial: n};
+            coins[n] = {i: unanchoredI, j: unanchoredJ, serial: n};
         }
 
         const container = document.createElement("div");
         container.innerHTML = `
-                <div>There is a pit here at "${i},${j}". It has value <span id="value">${coins.length}</span>.</div>
+                <div>There is a pit here at "${unanchoredI},${unanchoredJ}". It has value <span id="value">${coins.length}</span>.</div>
                 <button id="collect">collect</button>
                 <button id="deposit">deposit</button>`;
         const collect = container.querySelector<HTMLButtonElement>("#collect")!;
