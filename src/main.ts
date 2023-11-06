@@ -78,7 +78,7 @@ function makePit(i: number, j: number) {
 
         // fills array with unique coins
         for (let n = 0; n < coins.length; n++) {
-            coins[i] = {i: i, j: j, serial: n};
+            coins[n] = {i: i, j: j, serial: n};
         }
 
         const container = document.createElement("div");
