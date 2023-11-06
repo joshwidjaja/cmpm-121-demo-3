@@ -5,11 +5,11 @@ import luck from "./luck";
 import "./leafletWorkaround";
 //import board from "./board";
 
-/*interface Coin {
+interface Coin {
     i: number;
     j: number;
     serial: number;
-}*/
+}
 
 const MERRILL_CLASSROOM = leaflet.latLng({
     lat: 36.9995,
@@ -46,6 +46,8 @@ const playerMarker = leaflet.marker(MERRILL_CLASSROOM);
 playerMarker.bindTooltip("That's you!");
 playerMarker.addTo(map);
 
+const playerCoins: Coin[] = [];
+
 const sensorButton = document.querySelector("#sensor")!;
 sensorButton.addEventListener("click", () => {
     navigator.geolocation.watchPosition((position) => {
@@ -72,14 +74,23 @@ function makePit(i: number, j: number) {
 
     pit.bindPopup(() => {
         let value = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
+        const coins: Coin[] = new Array<Coin>(value);
+
+        // fills array with unique coins
+        for (let n = 0; n < coins.length; n++) {
+            coins[i] = {i: i, j: j, serial: n};
+        }
+
         const container = document.createElement("div");
         container.innerHTML = `
-                <div>There is a pit here at "${i},${j}". It has value <span id="value">${value}</span>.</div>
+                <div>There is a pit here at "${i},${j}". It has value <span id="value">${coins.length}</span>.</div>
                 <button id="collect">collect</button>
                 <button id="deposit">deposit</button>`;
         const collect = container.querySelector<HTMLButtonElement>("#collect")!;
         collect.addEventListener("click", () => {
             if (value > 0) {
+                playerCoins.push(coins.pop()!);
+
                 value--;
                 container.querySelector<HTMLSpanElement>("#value")!.innerHTML = value.toString();
                 points++;
@@ -89,6 +100,8 @@ function makePit(i: number, j: number) {
         const deposit = container.querySelector<HTMLButtonElement>("#deposit")!;
         deposit.addEventListener("click", () => {
             if (points > 0) {
+                coins.push(playerCoins.pop()!);
+
                 value++;
                 container.querySelector<HTMLSpanElement>("#value")!.innerHTML = value.toString();
                 points--;
