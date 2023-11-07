@@ -1,5 +1,4 @@
-//import leaflet, { LatLngBounds } from "leaflet";
-import leaflet from "leaflet";
+import leaflet, { LatLngBounds } from "leaflet";
 
 export interface Cell {
   readonly i: number;
@@ -38,7 +37,7 @@ export class Board {
     });
   }
 
-  getCellBounds(cell: Cell): leaflet.LatLngBounds {
+  getCellBounds(cell: Cell): LatLngBounds {
     return leaflet.latLngBounds([
       [cell.i * this.tileWidth, cell.j * this.tileWidth],
       [(cell.i + 1) * this.tileWidth, (cell.j + 1) * this.tileWidth],
