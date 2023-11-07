@@ -16,14 +16,8 @@ const PLAYER_LOCATION = leaflet.latLng({
   lng: -122.0533,
 });
 
-/*const NULL_ISLAND = leaflet.latLng({
-    lat: 0,
-    lng: 0
-});*/
-
 const GAMEPLAY_ZOOM_LEVEL = 19;
 const TILE_DEGREES = 1e-4;
-// const DEGREE_TO_ROUND = 4;
 const NEIGHBORHOOD_SIZE = 8;
 const PIT_SPAWN_PROBABILITY = 0.1;
 
@@ -67,10 +61,14 @@ let points = 0;
 const statusPanel = document.querySelector<HTMLDivElement>("#statusPanel")!;
 statusPanel.innerHTML = "No points yet...";
 
+// stores tiles so they can be removed later
+const tiles: leaflet.Layer[] = [];
+
 function makePit(i: number, j: number) {
   const cell: Cell = { i, j };
   const bounds = board.getCellBounds(cell);
-  const pit = leaflet.rectangle(bounds) as leaflet.Layer;
+    const pit = leaflet.rectangle(bounds) as leaflet.Layer;
+    tiles.push(pit);
 
   pit.bindPopup(() => {
     let value = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
@@ -123,14 +121,6 @@ centerMapAround(playerMarker.getLatLng());
 
 generateNeighborhood(PLAYER_LOCATION);
 
-/*for (let i = -NEIGHBORHOOD_SIZE; i < NEIGHBORHOOD_SIZE; i++) {
-  for (let j = -NEIGHBORHOOD_SIZE; j < NEIGHBORHOOD_SIZE; j++) {
-    if (luck([i, j].toString()) < PIT_SPAWN_PROBABILITY) {
-      makePit(i, j);
-    }
-  }
-}*/
-
 // additional functions
 
 function moveMarker(marker: leaflet.Marker, location: leaflet.LatLng): leaflet.Marker {
@@ -142,7 +132,9 @@ function centerMapAround(location: leaflet.LatLng) {
 }
 
 function removeAllPits() {
-    //
+    tiles.forEach(tile => {
+        tile.remove();
+    });
 }
 
 function generateNeighborhood(center: leaflet.LatLng) {
