@@ -123,6 +123,14 @@ centerMapAround(playerMarker.getLatLng());
 
 generateNeighborhood(PLAYER_LOCATION);
 
+/*for (let i = -NEIGHBORHOOD_SIZE; i < NEIGHBORHOOD_SIZE; i++) {
+  for (let j = -NEIGHBORHOOD_SIZE; j < NEIGHBORHOOD_SIZE; j++) {
+    if (luck([i, j].toString()) < PIT_SPAWN_PROBABILITY) {
+      makePit(i, j);
+    }
+  }
+}*/
+
 // additional functions
 
 function moveMarker(marker: leaflet.Marker, location: leaflet.LatLng): leaflet.Marker {
@@ -143,7 +151,7 @@ function generateNeighborhood(center: leaflet.LatLng) {
     for (let cellI = -NEIGHBORHOOD_SIZE; cellI < NEIGHBORHOOD_SIZE; cellI++) {
         for (let cellJ = -NEIGHBORHOOD_SIZE; cellJ < NEIGHBORHOOD_SIZE; cellJ++) {
             if (luck([i + cellI, j + cellJ].toString()) < PIT_SPAWN_PROBABILITY) {
-                makePit(i, j);
+                makePit(i + cellI, j + cellJ);
             }
         }
     }
