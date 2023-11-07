@@ -6,12 +6,12 @@ import "./leafletWorkaround";
 import { Board, Cell } from "./board";
 
 interface Coin {
-  i: string;
-  j: string;
+  i: number;
+  j: number;
   serial: number;
 }
 
-const MERRILL_CLASSROOM = leaflet.latLng({
+const PLAYER_LOCATION = leaflet.latLng({
   lat: 36.9995,
   lng: -122.0533,
 });
@@ -23,7 +23,7 @@ const MERRILL_CLASSROOM = leaflet.latLng({
 
 const GAMEPLAY_ZOOM_LEVEL = 19;
 const TILE_DEGREES = 1e-4;
-const DEGREE_TO_ROUND = 4;
+// const DEGREE_TO_ROUND = 4;
 const NEIGHBORHOOD_SIZE = 8;
 const PIT_SPAWN_PROBABILITY = 0.1;
 
@@ -31,7 +31,7 @@ const board = new Board(TILE_DEGREES, NEIGHBORHOOD_SIZE);
 const mapContainer = document.querySelector<HTMLElement>("#map")!;
 
 const map = leaflet.map(mapContainer, {
-  center: MERRILL_CLASSROOM,
+  center: PLAYER_LOCATION,
   zoom: GAMEPLAY_ZOOM_LEVEL,
   minZoom: GAMEPLAY_ZOOM_LEVEL,
   maxZoom: GAMEPLAY_ZOOM_LEVEL,
@@ -47,7 +47,7 @@ leaflet
   })
   .addTo(map);
 
-const playerMarker = leaflet.marker(MERRILL_CLASSROOM);
+let playerMarker = leaflet.marker(PLAYER_LOCATION);
 playerMarker.bindTooltip("That's you!");
 playerMarker.addTo(map);
 
@@ -76,21 +76,17 @@ function makePit(i: number, j: number) {
     let value = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
     const coins: Coin[] = new Array<Coin>(value);
 
-    const unanchoredI = (MERRILL_CLASSROOM.lat + i * TILE_DEGREES).toFixed(
-      DEGREE_TO_ROUND
-    );
-    const unanchoredJ = (MERRILL_CLASSROOM.lng + j * TILE_DEGREES).toFixed(
-      DEGREE_TO_ROUND
-    );
+      const cellI = i * TILE_DEGREES;
+      const cellJ = j * TILE_DEGREES;
 
     // fills array with unique coins
     for (let n = 0; n < coins.length; n++) {
-      coins[n] = { i: unanchoredI, j: unanchoredJ, serial: n };
+      coins[n] = { i: cellI, j: cellJ, serial: n };
     }
 
     const container = document.createElement("div");
     container.innerHTML = `
-                <div>There is a pit here at "${unanchoredI},${unanchoredJ}". It has value <span id="value">${coins.length}</span>.</div>
+                <div>There is a pit here at "${cellI},${cellJ}". It has value <span id="value">${coins.length}</span>.</div>
                 <button id="collect">collect</button>
                 <button id="deposit">deposit</button>`;
     const collect = container.querySelector<HTMLButtonElement>("#collect")!;
@@ -122,10 +118,33 @@ function makePit(i: number, j: number) {
   pit.addTo(map);
 }
 
-for (let i = -NEIGHBORHOOD_SIZE; i < NEIGHBORHOOD_SIZE; i++) {
-  for (let j = -NEIGHBORHOOD_SIZE; j < NEIGHBORHOOD_SIZE; j++) {
-    if (luck([i, j].toString()) < PIT_SPAWN_PROBABILITY) {
-      makePit(i, j);
+playerMarker = moveMarker(playerMarker, PLAYER_LOCATION);
+centerMapAround(playerMarker.getLatLng());
+
+generateNeighborhood(PLAYER_LOCATION);
+
+// additional functions
+
+function moveMarker(marker: leaflet.Marker, location: leaflet.LatLng): leaflet.Marker {
+    return marker.setLatLng(location);
+}
+
+function centerMapAround(location: leaflet.LatLng) {
+    map.setView(location);
+}
+
+function removeAllPits() {
+    //
+}
+
+function generateNeighborhood(center: leaflet.LatLng) {
+    removeAllPits();
+    const { i, j } = board.getCellForPoint(center);
+    for (let cellI = -NEIGHBORHOOD_SIZE; cellI < NEIGHBORHOOD_SIZE; cellI++) {
+        for (let cellJ = -NEIGHBORHOOD_SIZE; cellJ < NEIGHBORHOOD_SIZE; cellJ++) {
+            if (luck([i + cellI, j + cellJ].toString()) < PIT_SPAWN_PROBABILITY) {
+                makePit(i, j);
+            }
+        }
     }
-  }
 }
