@@ -11,6 +11,31 @@ interface Coin {
   serial: number;
 }
 
+/*interface Memento<T> {
+  toMemento(): T;
+  fromMemento(memento: T): void;
+}
+
+class Geocache implements Memento<string> {
+    i: number;
+    j: number;
+    numCoins: number;
+
+    constructor(i: number, j: number, numCoins: number) {
+        this.i = i;
+        this.j = j;
+        this.numCoins = numCoins;
+    }
+
+    toMemento(): string {
+        return this.numCoins.toString();
+    }
+
+    fromMemento(memento: string): void {
+        this.numCoins = parseInt(memento);
+    }
+}*/
+
 const PLAYER_LOCATION = leaflet.latLng({
   lat: 36.9995,
   lng: -122.0533,
@@ -59,30 +84,30 @@ sensorButton.addEventListener("click", () => {
 
 const north = document.querySelector("#north")!;
 north.addEventListener("click", () => {
-    playerMarker.getLatLng().lat += TILE_DEGREES;
-    playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
-    generateNeighborhood(playerMarker.getLatLng());
+  playerMarker.getLatLng().lat += TILE_DEGREES;
+  playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
+  generateNeighborhood(playerMarker.getLatLng());
 });
 
 const south = document.querySelector("#south")!;
 south.addEventListener("click", () => {
-    playerMarker.getLatLng().lat -= TILE_DEGREES;
-    playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
-    generateNeighborhood(playerMarker.getLatLng());
+  playerMarker.getLatLng().lat -= TILE_DEGREES;
+  playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
+  generateNeighborhood(playerMarker.getLatLng());
 });
 
 const west = document.querySelector("#west")!;
 west.addEventListener("click", () => {
-    playerMarker.getLatLng().lng -= TILE_DEGREES;
-    playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
-    generateNeighborhood(playerMarker.getLatLng());
+  playerMarker.getLatLng().lng -= TILE_DEGREES;
+  playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
+  generateNeighborhood(playerMarker.getLatLng());
 });
 
 const east = document.querySelector("#east")!;
 east.addEventListener("click", () => {
-    playerMarker.getLatLng().lng += TILE_DEGREES;
-    playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
-    generateNeighborhood(playerMarker.getLatLng());
+  playerMarker.getLatLng().lng += TILE_DEGREES;
+  playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
+  generateNeighborhood(playerMarker.getLatLng());
 });
 
 let points = 0;
@@ -95,15 +120,15 @@ const tiles: leaflet.Layer[] = [];
 function makePit(i: number, j: number) {
   const cell: Cell = { i, j };
   const bounds = board.getCellBounds(cell);
-    const pit = leaflet.rectangle(bounds) as leaflet.Layer;
-    tiles.push(pit);
+  const pit = leaflet.rectangle(bounds) as leaflet.Layer;
+  tiles.push(pit);
 
   pit.bindPopup(() => {
     let value = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
     const coins: Coin[] = new Array<Coin>(value);
 
-      const cellI = i * TILE_DEGREES;
-      const cellJ = j * TILE_DEGREES;
+    const cellI = i * TILE_DEGREES;
+    const cellJ = j * TILE_DEGREES;
 
     // fills array with unique coins
     for (let n = 0; n < coins.length; n++) {
@@ -151,28 +176,31 @@ generateNeighborhood(PLAYER_LOCATION);
 
 // additional functions
 
-function moveMarker(marker: leaflet.Marker, location: leaflet.LatLng): leaflet.Marker {
-    return marker.setLatLng(location);
+function moveMarker(
+  marker: leaflet.Marker,
+  location: leaflet.LatLng
+): leaflet.Marker {
+  return marker.setLatLng(location);
 }
 
 function centerMapAround(location: leaflet.LatLng) {
-    map.setView(location);
+  map.setView(location);
 }
 
 function removeAllPits() {
-    tiles.forEach(tile => {
-        tile.remove();
-    });
+  tiles.forEach((tile) => {
+    tile.remove();
+  });
 }
 
 function generateNeighborhood(center: leaflet.LatLng) {
-    removeAllPits();
-    const { i, j } = board.getCellForPoint(center);
-    for (let cellI = -NEIGHBORHOOD_SIZE; cellI < NEIGHBORHOOD_SIZE; cellI++) {
-        for (let cellJ = -NEIGHBORHOOD_SIZE; cellJ < NEIGHBORHOOD_SIZE; cellJ++) {
-            if (luck([i + cellI, j + cellJ].toString()) < PIT_SPAWN_PROBABILITY) {
-                makePit(i + cellI, j + cellJ);
-            }
-        }
+  removeAllPits();
+  const { i, j } = board.getCellForPoint(center);
+  for (let cellI = -NEIGHBORHOOD_SIZE; cellI < NEIGHBORHOOD_SIZE; cellI++) {
+    for (let cellJ = -NEIGHBORHOOD_SIZE; cellJ < NEIGHBORHOOD_SIZE; cellJ++) {
+      if (luck([i + cellI, j + cellJ].toString()) < PIT_SPAWN_PROBABILITY) {
+        makePit(i + cellI, j + cellJ);
+      }
     }
+  }
 }
