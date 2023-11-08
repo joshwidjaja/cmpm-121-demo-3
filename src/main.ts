@@ -57,6 +57,34 @@ sensorButton.addEventListener("click", () => {
   });
 });
 
+const north = document.querySelector("#north")!;
+north.addEventListener("click", () => {
+    playerMarker.getLatLng().lat += TILE_DEGREES;
+    playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
+    generateNeighborhood(playerMarker.getLatLng());
+});
+
+const south = document.querySelector("#south")!;
+south.addEventListener("click", () => {
+    playerMarker.getLatLng().lat -= TILE_DEGREES;
+    playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
+    generateNeighborhood(playerMarker.getLatLng());
+});
+
+const west = document.querySelector("#west")!;
+west.addEventListener("click", () => {
+    playerMarker.getLatLng().lng -= TILE_DEGREES;
+    playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
+    generateNeighborhood(playerMarker.getLatLng());
+});
+
+const east = document.querySelector("#east")!;
+east.addEventListener("click", () => {
+    playerMarker.getLatLng().lng += TILE_DEGREES;
+    playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
+    generateNeighborhood(playerMarker.getLatLng());
+});
+
 let points = 0;
 const statusPanel = document.querySelector<HTMLDivElement>("#statusPanel")!;
 statusPanel.innerHTML = "No points yet...";
