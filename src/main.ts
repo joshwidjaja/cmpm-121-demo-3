@@ -11,30 +11,30 @@ interface Coin {
   serial: number;
 }
 
-/*interface Memento<T> {
+interface Memento<T> {
   toMemento(): T;
   fromMemento(memento: T): void;
 }
 
 class Geocache implements Memento<string> {
-    i: number;
-    j: number;
-    numCoins: number;
+  i: number;
+  j: number;
+  numCoins: number;
 
-    constructor(i: number, j: number, numCoins: number) {
-        this.i = i;
-        this.j = j;
-        this.numCoins = numCoins;
-    }
+  constructor(i: number, j: number, numCoins: number) {
+    this.i = i;
+    this.j = j;
+    this.numCoins = numCoins;
+  }
 
-    toMemento(): string {
-        return this.numCoins.toString();
-    }
+  toMemento(): string {
+    return this.numCoins.toString();
+  }
 
-    fromMemento(memento: string): void {
-        this.numCoins = parseInt(memento);
-    }
-}*/
+  fromMemento(memento: string): void {
+    this.numCoins = parseInt(memento);
+  }
+}
 
 const PLAYER_LOCATION = leaflet.latLng({
   lat: 36.9995,
@@ -48,6 +48,8 @@ const PIT_SPAWN_PROBABILITY = 0.1;
 
 const board = new Board(TILE_DEGREES, NEIGHBORHOOD_SIZE);
 const mapContainer = document.querySelector<HTMLElement>("#map")!;
+
+const mementos = new Map<Geocache, string>();
 
 const map = leaflet.map(mapContainer, {
   center: PLAYER_LOCATION,
@@ -123,18 +125,29 @@ function makePit(i: number, j: number) {
   const pit = leaflet.rectangle(bounds) as leaflet.Layer;
   tiles.push(pit);
 
+  let value = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
+
+  const cellI = i * TILE_DEGREES;
+  const cellJ = j * TILE_DEGREES;
+
+  const geocache = new Geocache(cellI, cellJ, value);
+
+  const loadedValue = loadFromMementos(geocache);
+
+  if (loadedValue != -1) {
+    value = loadedValue;
+  }
+
+  const coins: Coin[] = new Array<Coin>(value);
+
+  // fills array with unique coins
+  for (let n = 0; n < coins.length; n++) {
+    coins[n] = { i: cellI, j: cellJ, serial: n };
+  }
+
+  updateMementos(geocache, value);
+
   pit.bindPopup(() => {
-    let value = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
-    const coins: Coin[] = new Array<Coin>(value);
-
-    const cellI = i * TILE_DEGREES;
-    const cellJ = j * TILE_DEGREES;
-
-    // fills array with unique coins
-    for (let n = 0; n < coins.length; n++) {
-      coins[n] = { i: cellI, j: cellJ, serial: n };
-    }
-
     const container = document.createElement("div");
     container.innerHTML = `
                 <div>There is a pit here at "${cellI},${cellJ}". It has value <span id="value">${coins.length}</span>.</div>
@@ -149,6 +162,8 @@ function makePit(i: number, j: number) {
         container.querySelector<HTMLSpanElement>("#value")!.innerHTML =
           value.toString();
         points++;
+
+        updateMementos(geocache, value);
         statusPanel.innerHTML = `${points} points accumulated`;
       }
     });
@@ -161,6 +176,8 @@ function makePit(i: number, j: number) {
         container.querySelector<HTMLSpanElement>("#value")!.innerHTML =
           value.toString();
         points--;
+
+        updateMementos(geocache, value);
         statusPanel.innerHTML = `${points} points accumulated`;
       }
     });
@@ -203,4 +220,17 @@ function generateNeighborhood(center: leaflet.LatLng) {
       }
     }
   }
+}
+
+function updateMementos(geocache: Geocache, value: number) {
+  geocache.numCoins = value;
+  mementos.set(geocache, geocache.toMemento());
+}
+
+function loadFromMementos(geocache: Geocache): number {
+  if (mementos.has(geocache)) {
+    geocache.fromMemento(mementos.get(geocache)!);
+    return geocache.numCoins;
+  }
+  return -1;
 }
