@@ -21,7 +21,7 @@ class Geocache implements Memento<string> {
   j: number;
   numCoins: number;
 
-  constructor(i: number, j: number, numCoins: number) {
+  constructor(i: number, j: number, numCoins = 0) {
     this.i = i;
     this.j = j;
     this.numCoins = numCoins;
@@ -45,6 +45,7 @@ const GAMEPLAY_ZOOM_LEVEL = 19;
 const TILE_DEGREES = 1e-4;
 const NEIGHBORHOOD_SIZE = 8;
 const PIT_SPAWN_PROBABILITY = 0.1;
+const MAX_INITIAL_COINS = 3;
 
 const board = new Board(TILE_DEGREES, NEIGHBORHOOD_SIZE);
 const mapContainer = document.querySelector<HTMLElement>("#map")!;
@@ -119,18 +120,18 @@ statusPanel.innerHTML = "No points yet...";
 // stores tiles so they can be removed later
 const tiles: leaflet.Layer[] = [];
 
-function makePit(i: number, j: number) {
+function makeGeocache(i: number, j: number) {
   const cell: Cell = { i, j };
   const bounds = board.getCellBounds(cell);
-  const pit = leaflet.rectangle(bounds) as leaflet.Layer;
-  tiles.push(pit);
+  const geocacheRect = leaflet.rectangle(bounds) as leaflet.Layer;
+  tiles.push(geocacheRect);
 
-  let value = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
+  let value = Math.floor(luck([i, j, "initialValue"].toString()) * MAX_INITIAL_COINS);
 
   const cellI = i * TILE_DEGREES;
   const cellJ = j * TILE_DEGREES;
 
-  const geocache = new Geocache(cellI, cellJ, value);
+  const geocache = new Geocache(cellI, cellJ);
 
   const loadedValue = loadFromMementos(geocache);
 
@@ -138,6 +139,7 @@ function makePit(i: number, j: number) {
     value = loadedValue;
   }
 
+  geocache.numCoins = value;
   const coins: Coin[] = new Array<Coin>(value);
 
   // fills array with unique coins
@@ -147,7 +149,7 @@ function makePit(i: number, j: number) {
 
   updateMementos(geocache, value);
 
-  pit.bindPopup(() => {
+  geocacheRect.bindPopup(() => {
     const container = document.createElement("div");
     container.innerHTML = `
                 <div>There is a pit here at "${cellI},${cellJ}". It has value <span id="value">${coins.length}</span>.</div>
@@ -183,7 +185,7 @@ function makePit(i: number, j: number) {
     });
     return container;
   });
-  pit.addTo(map);
+  geocacheRect.addTo(map);
 }
 
 playerMarker = moveMarker(playerMarker, PLAYER_LOCATION);
@@ -216,7 +218,7 @@ function generateNeighborhood(center: leaflet.LatLng) {
   for (let cellI = -NEIGHBORHOOD_SIZE; cellI < NEIGHBORHOOD_SIZE; cellI++) {
     for (let cellJ = -NEIGHBORHOOD_SIZE; cellJ < NEIGHBORHOOD_SIZE; cellJ++) {
       if (luck([i + cellI, j + cellJ].toString()) < PIT_SPAWN_PROBABILITY) {
-        makePit(i + cellI, j + cellJ);
+        makeGeocache(i + cellI, j + cellJ);
       }
     }
   }
