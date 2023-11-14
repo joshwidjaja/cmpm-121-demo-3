@@ -50,7 +50,7 @@ const MAX_INITIAL_COINS = 3;
 const board = new Board(TILE_DEGREES, NEIGHBORHOOD_SIZE);
 const mapContainer = document.querySelector<HTMLElement>("#map")!;
 
-const mementos = new Map<Geocache, string>();
+const mementos = new Map<string, string>();
 
 const map = leaflet.map(mapContainer, {
   center: PLAYER_LOCATION,
@@ -148,6 +148,8 @@ function makeGeocache(i: number, j: number) {
   }
 
   updateMementos(geocache, value);
+  console.log(mementos);
+  console.log(cellI, cellJ, loadedValue);
 
   geocacheRect.bindPopup(() => {
     const container = document.createElement("div");
@@ -226,12 +228,14 @@ function generateNeighborhood(center: leaflet.LatLng) {
 
 function updateMementos(geocache: Geocache, value: number) {
   geocache.numCoins = value;
-  mementos.set(geocache, geocache.toMemento());
+  const key = [geocache.i, geocache.j].toString();
+  mementos.set(key, geocache.toMemento());
 }
 
 function loadFromMementos(geocache: Geocache): number {
-  if (mementos.has(geocache)) {
-    geocache.fromMemento(mementos.get(geocache)!);
+  const key = [geocache.i, geocache.j].toString();
+  if (mementos.has(key)) {
+    geocache.fromMemento(mementos.get(key)!);
     return geocache.numCoins;
   }
   return -1;
