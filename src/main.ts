@@ -148,8 +148,6 @@ function makeGeocache(i: number, j: number) {
   }
 
   updateMementos(geocache, value);
-  console.log(mementos);
-  console.log(cellI, cellJ, loadedValue);
 
   geocacheRect.bindPopup(() => {
     const container = document.createElement("div");
