@@ -113,6 +113,9 @@ east.addEventListener("click", () => {
   generateNeighborhood(playerMarker.getLatLng());
 });
 
+const reset = document.querySelector("#reset")!;
+reset.addEventListener("click", () => resetEverything);
+
 let points = 0;
 const statusPanel = document.querySelector<HTMLDivElement>("#statusPanel")!;
 statusPanel.innerHTML = "No points yet...";
@@ -206,14 +209,14 @@ function centerMapAround(location: leaflet.LatLng) {
   map.setView(location);
 }
 
-function removeAllPits() {
+function removeAllGeocaches() {
   tiles.forEach((tile) => {
     tile.remove();
   });
 }
 
 function generateNeighborhood(center: leaflet.LatLng) {
-  removeAllPits();
+  removeAllGeocaches();
   const { i, j } = board.getCellForPoint(center);
   for (let cellI = -NEIGHBORHOOD_SIZE; cellI < NEIGHBORHOOD_SIZE; cellI++) {
     for (let cellJ = -NEIGHBORHOOD_SIZE; cellJ < NEIGHBORHOOD_SIZE; cellJ++) {
@@ -237,4 +240,10 @@ function loadFromMementos(geocache: Geocache): number {
     return geocache.numCoins;
   }
   return -1;
+}
+
+function resetEverything() {
+  removeAllGeocaches();
+  playerCoins.forEach(() => playerCoins.pop());
+  mementos.clear();
 }
