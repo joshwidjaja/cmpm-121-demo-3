@@ -174,7 +174,7 @@ function makeGeocache(i: number, j: number) {
         points++;
 
         updateMementos(geocache, value);
-        statusPanel.innerHTML = `${points} points accumulated`;
+        updateStatus();
       }
     });
     const deposit = container.querySelector<HTMLButtonElement>("#deposit")!;
@@ -188,7 +188,7 @@ function makeGeocache(i: number, j: number) {
         points--;
 
         updateMementos(geocache, value);
-        statusPanel.innerHTML = `${points} points accumulated`;
+        updateStatus();
       }
     });
     return container;
@@ -232,6 +232,10 @@ function generateNeighborhood(center: leaflet.LatLng) {
   }
 }
 
+function updateStatus() {
+  statusPanel.innerHTML = `${playerCoins.length} points accumulated`;
+}
+
 function updateMementos(geocache: Geocache, value: number) {
   geocache.numCoins = value;
   const key = [geocache.i, geocache.j].toString();
@@ -250,6 +254,7 @@ function loadFromMementos(geocache: Geocache): number {
 function resetEverything() {
   removeAllGeocaches();
   playerCoins.forEach(() => playerCoins.pop());
+  updateStatus();
   mementos.clear();
   generateNeighborhood(playerMarker.getLatLng());
 }
