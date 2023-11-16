@@ -114,7 +114,12 @@ east.addEventListener("click", () => {
 });
 
 const reset = document.querySelector("#reset")!;
-reset.addEventListener("click", () => resetEverything);
+reset.addEventListener("click", () => {
+  const warning = window.prompt("Enter 'yes' to reset:");
+  if (warning?.toLowerCase() === "yes") {
+    resetEverything();
+  }
+});
 
 let points = 0;
 const statusPanel = document.querySelector<HTMLDivElement>("#statusPanel")!;
@@ -246,4 +251,5 @@ function resetEverything() {
   removeAllGeocaches();
   playerCoins.forEach(() => playerCoins.pop());
   mementos.clear();
+  generateNeighborhood(playerMarker.getLatLng());
 }
