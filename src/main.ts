@@ -85,32 +85,37 @@ sensorButton.addEventListener("click", () => {
   });
 });
 
+const coordinateHistory: leaflet.LatLng[] = [];
+coordinateHistory.push(playerMarker.getLatLng());
+const polyline = leaflet.polyline(coordinateHistory, { color: "red" });
+polyline.addTo(map);
+
 const north = document.querySelector("#north")!;
 north.addEventListener("click", () => {
   playerMarker.getLatLng().lat += TILE_DEGREES;
   playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
-  generateNeighborhood(playerMarker.getLatLng());
+  updateMovementHistory(playerMarker.getLatLng());
 });
 
 const south = document.querySelector("#south")!;
 south.addEventListener("click", () => {
   playerMarker.getLatLng().lat -= TILE_DEGREES;
   playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
-  generateNeighborhood(playerMarker.getLatLng());
+  updateMovementHistory(playerMarker.getLatLng());
 });
 
 const west = document.querySelector("#west")!;
 west.addEventListener("click", () => {
   playerMarker.getLatLng().lng -= TILE_DEGREES;
   playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
-  generateNeighborhood(playerMarker.getLatLng());
+  updateMovementHistory(playerMarker.getLatLng());
 });
 
 const east = document.querySelector("#east")!;
 east.addEventListener("click", () => {
   playerMarker.getLatLng().lng += TILE_DEGREES;
   playerMarker = moveMarker(playerMarker, playerMarker.getLatLng());
-  generateNeighborhood(playerMarker.getLatLng());
+  updateMovementHistory(playerMarker.getLatLng());
 });
 
 const reset = document.querySelector("#reset")!;
@@ -232,6 +237,13 @@ function generateNeighborhood(center: leaflet.LatLng) {
   }
 }
 
+function updateMovementHistory(location: leaflet.LatLng) {
+  generateNeighborhood(location);
+  coordinateHistory.push(location);
+  polyline.addLatLng(location);
+  polyline.redraw();
+}
+
 function updateStatus() {
   statusPanel.innerHTML = `${playerCoins.length} points accumulated`;
 }
@@ -253,8 +265,13 @@ function loadFromMementos(geocache: Geocache): number {
 
 function resetEverything() {
   removeAllGeocaches();
+
+  polyline.remove();
+  polyline.addTo(map);
+
   playerCoins.forEach(() => playerCoins.pop());
   updateStatus();
   mementos.clear();
+  localStorage.clear();
   generateNeighborhood(playerMarker.getLatLng());
 }
